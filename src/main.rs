@@ -1,6 +1,7 @@
-use core::panic;
-use reqwest::{redirect::Policy, StatusCode};
-use std::{fs::File, io::Write};
+mod downloader;
+
+use crate::downloader::Downloader;
+use reqwest::redirect::Policy;
 
 fn main() {
     // Make an HTTP client that treats 301 and 302 results as errors.
@@ -10,36 +11,32 @@ fn main() {
         .build()
         .unwrap();
 
-    for prefix in generate_image_url_prefixes(12, 204, 6) {
-        let filename = format!("{}.zoomdconc.png", prefix);
-        let url = format!(
-            "https://forecast.uoa.gr/maps/0day/DUST/GRID1/zoomdconc/{}",
-            filename
-        );
+    let dust_concentration = Downloader::new(&client);
+    let dust_load = Downloader::new(&client);
 
-        print!("Downloading {} ... ", url);
-        {
-            let rq = client.get(url).build().unwrap();
-            let response = client.execute(rq).unwrap();
-            match response {
-                r if r.status() == StatusCode::OK => {
-                    let image_bytes = r.bytes().unwrap();
-                    let mut file = File::create(filename).unwrap();
-                    file.write_all(&image_bytes).unwrap();
-                }
-                r => {
-                    println!("FAILED");
-                    panic!("{:?}", r);
-                }
-            }
-        }
-        println!("OK");
-    }
-}
+    dust_concentration.download(&downloader::PageInfo {
+        filename_template: |prefix| format!("{}.zoomdconc.png", prefix),
+        url_template: |filename| {
+            format!(
+                "https://forecast.uoa.gr/maps/0day/DUST/GRID1/zoomdconc/{}",
+                filename
+            )
+        },
+        prefix_start: 12,
+        prefix_end_inclusive: 204,
+        step: 6,
+    });
 
-fn generate_image_url_prefixes(start: u8, end_inclusive: u8, step: u8) -> Vec<String> {
-    (start..end_inclusive + 1)
-        .step_by(step as usize)
-        .map(|i| format!("{:03}", i))
-        .collect()
+    dust_load.download(&downloader::PageInfo {
+        filename_template: |prefix| format!("{}.zoomdload.png", prefix),
+        url_template: |filename| {
+            format!(
+                "https://forecast.uoa.gr/maps/0day/DUST/GRID1/zoomdload/{}",
+                filename
+            )
+        },
+        prefix_start: 12,
+        prefix_end_inclusive: 204,
+        step: 6,
+    });
 }
