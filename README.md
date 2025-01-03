@@ -19,3 +19,11 @@ Options:
   -V, --version
           Print version
 ```
+
+Example with specified filenames:
+
+`./skiron-dust --dust-load dust.gif --dust-concentration concentration.gif --fps 5`
+
+Example with default values, dust load only:
+
+`./skiron-dust --dust-load`
