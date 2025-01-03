@@ -1,6 +1,6 @@
 # skiron-dust
 
-Downloads European dust concentration and dust load forecasts from the University of Athens website and combines them into GIF files.
+Downloads [European dust concentration and dust load forecasts from the University of Athens](https://forecast.uoa.gr/en/forecast-maps/dust/europe) website and combines them into GIF files.
 
 ```
 Usage: skiron-dust.exe [OPTIONS]
